@@ -1,0 +1,36 @@
+﻿@page "/"
+
+
+<PageTitle>Home</PageTitle>
+
+<h3 style="box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 0.5rem 1rem; border-radius: 6px; background: #fff;">
+    OpenAI API Integration using Microsoft Semantic Kernel SDK
+</h3>
+<h4 style="text-shadow: 2px 2px 4px #888888; padding: 0.4rem 0.8rem; border-radius: 4px; ">
+    Generating SQL Queries via AI for use in a Blazor Database Application
+</h4>
+
+<div class="alert alert-info">
+    <p>
+        This is a Blazor WebAapp .NET 9 (Render Mode Server) that uses the <b>Microsoft Semantic Kernel SDK</b> to connect to the OpenAI API.
+    </p>
+    
+    Key Features and Implementation Steps:
+    <ul>
+        <li>Install the Microsoft.SemanticKernel NuGet Package</li>
+        <li>Update Program.cs ... builder.Services.AddKernel().AddOpenAIChatCompletion(modelId:"gpt-4o-mini",apiKey: "yourKey");</li> 
+        <li>Add a simple class called ChatMessage in the Models folder</li>
+    </ul>
+    In the KernelPage.razor page make note of ...
+    <ul>
+        <li>using Microsoft.SemanticKernel and inject Kernel kernel</li>
+        <li>in the Code section  await foreach (var message in kernel.InvokePromptStreamingAsync(userInput)) </li>        
+    </ul> 
+    <b>NEW</b> ... This updated Application adds the ability to send a prompt to an AI for a SQL Query which will be used to select data from a local DB
+    <ul>
+        <li>Note how the Generate Schema option is used help us create a System Message that we send to an AI model </li>
+        <li>Check out the Sqlai.razor page for all the details</li>
+        <li>Check out the Models folder for the key classes ... AIQuery,DataServices,Message,Rootobject,TableSchema</li>
+    </ul>
+</div>
+

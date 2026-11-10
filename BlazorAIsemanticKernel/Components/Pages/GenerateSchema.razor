@@ -1,0 +1,128 @@
+﻿@page "/generateschema"
+@using Microsoft.Data.SqlClient
+@rendermode InteractiveServer
+
+<h5>Generate Schema Automatically</h5>
+<div class="alert alert-info">
+    This component connects to a SQL Server database using a connection string, retrieves the database schema (table names, column names, and data types), and displays it in a structured format.<br />
+    The connection string used in this example connects to a local database named SongListBase.<br />
+    You can modify the connection string in the OnInitialized method to connect to your own database.<br />
+    Make sure the database is accessible and that you have the necessary permissions to read its schema.<br/>
+    ... <b>We use this Schema to inform the AI about the database structure in SQL AI implementations.Check out the Sqlai.razor component and
+        specifically the "system" message that provides the schema to the AI.
+        </b>
+</div>
+
+<h5>Determing Schema Manually</h5>
+<div class="alert alert-success">
+    You can determine the schema manually by taking a deep dive in the SQL Server Object Explorer. In this particular case 
+    we look for the SongListBase database and then the Song table. Right click on the table and select "View Designer".
+    This will show you the columns and data types. You can then manually create a schema representation like the one below.
+    <pre>-SongListBase.dbo.Song (Id (int), Title (nvarchar), Artist (nvarchar), Year (nvarchar), Chart1 (bit)) </pre>   
+</div>
+
+@if (schema != null && schema.Count > 0)
+{
+    <h5>Database Schema</h5>
+    <ul>
+        @foreach (var item in schema)
+        {
+            <li>@item</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Loading database schema...</p>
+}
+
+@code {
+
+    
+    List<KeyValuePair<string, string>> rows = new();    //creates a new list that will store pairs of strings (table name, column name and data type)
+    List<TableSchema> dbSchema = new();                 //creates a new list object of class type TableSchema that will store the schema of the database (table name and columns)
+    List<string> schema;                                //this will hold formatted schema descriptions eg. -dbo.Table (Column1 (DataType), Column2 (DataType), ...)
+
+    protected override void OnInitialized()
+    {        
+        //connection string is found in appsettings.json for the BlazorSongListWASM application
+        var cs = "Server=(localdb)\\mssqllocaldb;Database=SongListBase;Trusted_Connection=True;MultipleActiveResultSets=true";
+        GenerateSchemaFromConnectionString(cs);
+    }
+
+    //cs = connection string
+    private void GenerateSchemaFromConnectionString(string cs)
+    {
+        schema = new List<string>();
+
+        //connect to the database and get the schema which includes table names and column names and data types
+        //Store the schema in a list of TableSchema objects which has TableName and Columns properties
+        
+        using (SqlConnection connection = new SqlConnection(cs))
+        {
+            connection.Open();
+
+            //https://stackoverflow.com/questions/1152260/getting-table-column-names-and-data-types-in-sql-server
+            //get the schema of the database
+            //QUERY to get table names, column names and data types           
+            
+            //SCHEMA_NAME(o.schema_id) + '.' + o.name AS TableName: 
+            // Combines the schema name (like dbo) and the table name (like Students or MovieModel in my case from the Net9DB database) 
+            // to get the full table name (e.g., dbo.Students).
+
+            string sql = @"SELECT SCHEMA_NAME(o.schema_id) + '.' + o.name AS TableName, c.name AS ColumnName, t.Name AS DataType
+            FROM sys.columns c
+            JOIN sys.objects o ON o.object_id = c.object_id
+            JOIN sys.types t ON c.user_type_id = t.user_type_id
+            WHERE o.type = 'U'
+            ORDER BY o.Name";  
+
+            // EXECUTE the query and read the results
+            // Store the results in the rows list as KeyValuePair<string,string> where key is table name and value is column name and data type
+            // Similar to Dictionary but allows duplicate keys 
+            using (SqlCommand command = new SqlCommand(sql,connection))
+            {
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        //rows is a list of KeyValuePair<string,string>
+                        rows.Add(new KeyValuePair<string, string>(reader.GetString(0), reader.GetString(1) + " (" + reader.GetString(2) + ")"));
+                    }
+                }
+            }
+
+            // Group the rows by table name
+            var groups = rows.GroupBy(x => x.Key);
+
+            // Create a list of TableSchema objects from the grouped rows
+            foreach (var group in groups)
+            {
+                // dbSchema is a list of TableSchema objects ... List<TableSchema> dbSchema
+                // TableSchema has TableName and Columns propertie(s) where Columns is a list of strings
+                dbSchema.Add(new TableSchema() { TableName = group.Key, Columns = group.Select(x => x.Value).ToList() });                
+            }            
+
+            // Iterate through each table in the dbSchema list
+            foreach (var table in dbSchema)
+            {
+                var schemaLine = $"-{table.TableName} (";  
+
+                // Iterate through each column in the table and add it to the schemaLine string
+                foreach (var column in table.Columns)
+                {
+                    schemaLine += column + ", ";
+                }
+
+                // Close the parentheses and remove the trailing comma and space if necessary
+                schemaLine += ")";
+                schemaLine = schemaLine.Replace(", )", ")");
+
+                // Add the schemaLine to the schema list ... List<string> schema and textLines list
+                schema.Add(schemaLine);
+                
+            }   
+        }
+
+    }
+}

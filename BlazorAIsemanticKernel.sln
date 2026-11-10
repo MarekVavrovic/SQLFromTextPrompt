@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAIsemanticKernel", "BlazorAIsemanticKernel\BlazorAIsemanticKernel.csproj", "{F52897AF-1727-42A6-B8D6-204ACDE4DE94}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F52897AF-1727-42A6-B8D6-204ACDE4DE94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F52897AF-1727-42A6-B8D6-204ACDE4DE94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F52897AF-1727-42A6-B8D6-204ACDE4DE94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F52897AF-1727-42A6-B8D6-204ACDE4DE94}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {381E78D6-C5B2-4143-878A-65F57A66E3C2}
+	EndGlobalSection
+EndGlobal
